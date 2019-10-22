@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+
+<style>
+    .v-toolbar__content, .v-toolbar__extension {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    padding: 0 24px;
+    }
+    .h1, h1 {
+    color: black;
+    font-size: 2.5rem;
+}
+dl, ol, ul {
+    color: black;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+    
+</style>
+
+
+  <div id="app">
+    <v-app>
+      <v-content>
+        <v-container fluid><v-toolbar dark color="white" extended>
+
+                <template v-slot:extension>
+                        <v-toolbar-title class="black--text">Github Repository</v-toolbar-title>
+                </template>
+
+            <v-btn icon>
+                 <img src="./assets/github.png" width="50px" height="50px">            
+            </v-btn>
+        
+        
+            <v-spacer></v-spacer>
+        
+            <v-btn icon>
+                  <img src="./assets/actualizar.png" alt="">
+            </v-btn>
+        
+            
+          </v-toolbar></v-container>
+
+          <v-container>
+                <v-card
+    color="blue-grey darken-1"
+    dark
+  >
+    <v-img
+      height="250"
+      src="https://images.pexels.com/photos/1162964/pexels-photo-1162964.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    >
+      <v-layout wrap>
+      
+        <v-flex
+          text-xs-right
+          xs12
+        >
+          <v-menu
+            bottom
+            left
+          >
+           
+           
+          </v-menu>
+        </v-flex>
+        <v-layout
+          align-start
+          column
+          justify-end
+          pa-3
+        >
+          <h3 class="headline">Github</h3>
+          <span class="grey--text text--lighten-1">Encuentra los repositorios</span>
+        </v-layout>
+      </v-layout>
+    </v-img>
+
+    <div class="input">
+   
+        <div class="input-group mb-3">
+           
+            <input v-model="username" type="text" class="form-control" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
+          
+          </div>
+
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+              Mostrar
+            </button>
+            
+            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <h1>Repositorios</h1>
+                    <ol>
+                      <li  v-for="repo in repos">
+                        {{ repo.name }}
+                      </li>
+                    </ol>
+                    
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+      </div>
+    
+            </v-card>
+          </v-container>
+      </v-content>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script>
+
+
+    function getGit (username){
+         return   fetch(`https://api.github.com/users/${username}/repos`)
+            .then(response => response.json()) 
+    }
+
+    function debouce (func, wait, immediate ) {
+      self.timeout=self.timeout || null;
+      return function () {
+        var context = this, arg = arguments;
+        clearTimeout(self.timeout);
+        self.timeout = setTimeout(function() {
+          self.timeout= null;
+          if (!immediate) func.apply(context, arg);
+        }, wait);
+        if (immediate && !self.timeout) func.apply(context, arg);
+        };
+      }
+     new Vue({
+
+        el: '#app',
+        data: {
+        repos: [],
+        username: '',
+      },
+         watch: {
+       username: function (newValue, oldValue) {
+         debouce(() => {
+          getGit(this.username).then(repos => {
+             if (repos.length > 0 && repos[0].id)
+               this.repos = repos;
+           });
+         }, 500)() 
+          
+       }
+     },
+     
+     })
+  </script>
+</body>
+</html>
